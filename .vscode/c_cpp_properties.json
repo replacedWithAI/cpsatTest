@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "compilerPath": "/usr/bin/g++",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/subsa/Downloads/or-tools_x86_64_Ubuntu-24.04_cpp_v9.12.4544/include"
+            ],
+            "browse": {
+                "path": [
+                    "/home/subsa/Downloads/or-tools_x86_64_Ubuntu-24.04_cpp_v9.12.4544/include",
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "defines": [],
+            "cStandard": "c23",
+            "cppStandard": "gnu++23",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
