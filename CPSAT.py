@@ -1,26 +1,16 @@
-import json
-from pathlib import Path
+from ortools.sat.python import cp_model
 from typing import Any
-from dataclasses import dataclass
-import Json_departments_to_server_writer
-from Course_json_string_retriever import Course_json_retriever
-from LabsOrTutorials import LabsOrTutorials
-from Lectures import Lectures
-from Sections import Sections
-from Course import Course
+from Extract_course_data import add_courses_to_CPSAT
 
-json_departments_to_server_writer = Json_departments_to_server_writer
-department_json_path = json_departments_to_server_writer.get_files()
-del json_departments_to_server_writer
-print(department_json_path)
-
-requested_courses = [input("Ok nice, now give your course names and type '-1' to leave")]
-while (requested_courses[-1] != "-1"):
-    requested_courses.append(input("List another or type '-1' to leave"))
-del(requested_courses[-1])
-print(requested_courses)
-
-Course_json_retriever = Course_json_retriever(department_json_path, requested_courses)
-course_jsons = Course_json_retriever.get_course_jsons()
-del Course_json_retriever
+class Scheduler:
+    def __add_constraints():
         
+    def __solve_for_optimum():
+
+    def __init__(self, course_jsons: list[dict[str, Any]]):
+        solver = cp_model.CpModel()
+
+        #add_courses_to_CPSAT()
+        #add_constraints()
+        #solve_for_optimum()
+

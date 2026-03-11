@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 # from LabsOrTutorials import LabsOrTutorials
-from Lectures import Lectures
+from Lecture import Lecture
 
 @dataclass
 class Sections:
-    terms: str
+    term: str
     section_letter: str
     professor: str
-    lectures: list[Lectures]
+    lectures: Lecture

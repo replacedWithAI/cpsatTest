@@ -10,6 +10,5 @@ class Course:
     course_code: str
     credits: str
     course_name: str
-    campus: str
     prerequisites: list[str]
     sections: list[Sections]
