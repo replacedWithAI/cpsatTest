@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from Class_sessions import Class_sessions
+from Other_class_sessions import Other_class_session
 
 @dataclass
 class Lecture:
     activity_name: str
     days: list[str]
     start_times: list[str]
-    end_times: list[str]
+    durations: list[int]
+    durations.setdefault([0])
     campus: list[str]
-    lab_or_tutorials: list[Class_sessions]
+    other_class_sessions: list[Other_class_session]

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from Lecture import Lecture
 
 @dataclass
-class Sections:
+class Section:
     term: str
     section_letter: str
     professor: str

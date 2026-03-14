@@ -5,9 +5,9 @@ from dataclasses import dataclass
 import Json_departments_to_server_writer
 from Course_json_string_retriever import Course_json_retriever
 from Extract_course_data import Course_file_extractor
-from Class_sessions import Class_sessions
+from Other_class_sessions import Other_class_session
 from Lecture import Lecture
-from Sections import Sections
+from Sections import Section
 from Course import Course
 
 json_departments_to_server_writer = Json_departments_to_server_writer
