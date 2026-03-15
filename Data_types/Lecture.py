@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Other_class_sessions import Other_class_session
+from Data_types.Other_class_sessions import Other_class_session
 
 @dataclass
 class Lecture:

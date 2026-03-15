@@ -1,8 +1,8 @@
 from typing import Any
-from Course import Course
-from Sections import Section
-from Lecture import Lecture
-from Other_class_sessions import Other_class_session
+from Data_types.Course import Course
+from Data_types.Sections import Section
+from Data_types.Lecture import Lecture
+from Data_types.Other_class_sessions import Other_class_session
 
 class Course_file_extractor:
     def __make_course_obj(self, course_jsons: list[dict[str, Any]]) -> list[Course]:
