@@ -7,6 +7,5 @@ class Lecture:
     days: list[str]
     start_times: list[str]
     durations: list[int]
-    durations.setdefault([0])
     campus: list[str]
     other_class_sessions: list[Other_class_session]
