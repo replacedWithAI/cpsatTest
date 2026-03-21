@@ -40,7 +40,8 @@ class Course_json_retriever:
                 key = course.get("key","Not found")
                 code = key.get("code", "Not found")
                 department = key.get("dept", "Not found")
-                if code == course_codes[index] and department == department_codes[index]: # I feel like this is bugged; saving test case in drive. It's the same code as C4 without a break
+                if code == course_codes[index] and department == \
+                   department_codes[index]: # I feel like this is bugged; saving test case in drive. It's the same code as C4 without a break
                     course_json_strings.append(course)
                     index += 1
                     break
@@ -55,4 +56,6 @@ class Course_json_retriever:
         department_codes = self.__get_department_codes(requested_course_names)
         course_codes = self.__get_course_codes(requested_course_names)
         department_data = self.__open_department_jsons(user_path, department_codes)
-        self.course_jsons = self.__download_course_json_strings(department_data, department_codes, course_codes)
+        self.course_jsons = self.__download_course_json_strings(department_data, 
+                                                                department_codes, 
+                                                                course_codes)
