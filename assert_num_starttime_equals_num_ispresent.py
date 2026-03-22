@@ -1,5 +1,5 @@
 import main
-from CPSAT.Make_CPSAT_variables import CPSAT_variable_maker
+from Scheduler.CPSAT.Make_CPSAT_variables import CPSAT_variable_maker
 
 main_obj = main
 courses = main_obj.Course_file_extractor.get_list_of_courses_data()
@@ -7,5 +7,48 @@ CPSAT_variable_maker_obj = CPSAT_variable_maker(courses)
 start_time_variables = CPSAT_variable_maker_obj.start_time_variables
 is_present_variables = CPSAT_variable_maker_obj.is_present_variables
 
-print(start_time_variables)
-print(is_present_variables)
+total_num_start_time_variables = 0
+total_num_is_present_variables = 0
+
+for course in courses:
+    for section in course.sections:
+
+        list_start_time_variables = start_time_variables[course.course_name][section.section_letter]
+        list_is_present_variables = is_present_variables[course.course_name][section.section_letter]
+        
+        print(course.course_name)
+        print(section.section_letter)
+
+        num_start_time_variables = len(list_start_time_variables)
+        num_is_present_variables = len(list_is_present_variables)
+
+        total_num_start_time_variables += num_start_time_variables
+        total_num_is_present_variables += num_is_present_variables
+
+        num_variables_difference = abs(num_start_time_variables - num_is_present_variables)
+
+        if (num_variables_difference != 0):
+            print("There is a difference of " + num_variables_difference \
+            + "between CPSAT variables")
+
+            loop_index = 0
+            for i in range(max(num_start_time_variables, num_is_present_variables)):
+                # print(list_start_time_variables[i])
+                # print(list_is_present_variables)
+                loop_index += 1
+
+            print(loop_index)
+            print(num_is_present_variables)
+            print(num_start_time_variables)
+            if (num_is_present_variables) != loop_index:
+                print("num of is_present variables is bigger than start_time; \
+                it's this many more:" + str(num_is_present_variables - loop_index))
+
+            if (num_start_time_variables) != loop_index:
+                print("num of start_time variables is bigger than is_present; \
+                it's this many more:" + str(num_start_time_variables - loop_index))
+
+print("Total number of is_present variables: " + str(total_num_is_present_variables))
+print("Total number of start_time variables: " + str(total_num_start_time_variables))
+                
+            
