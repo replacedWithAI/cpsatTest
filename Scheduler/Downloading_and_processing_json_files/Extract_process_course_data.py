@@ -17,8 +17,9 @@ class Course_file_extractor:
             section_json = course_json.get("schedule")
             course_obj = Course( course_key.get("faculty"), course_key.get \
                                 ("dept"), course_key.get("code"), \
-                                course_key.get("credit"),
-                                course_json.get("name"), course_json.get("prereq"), \
+                                course_key.get("credit"), \
+                                course_json.get("name"), \
+                                course_json.get("prereq"), \
                                 self.__make_section_obj(section_json) ) 
             courses.append(course_obj)
 
@@ -57,7 +58,8 @@ class Course_file_extractor:
         global_end_times = []
         campus = []
         lecture_timeslots = lecture_json.get("timeslot")
-        
+        # print(term)
+
         for curr_term in term:
             for lecture_timeslot in lecture_timeslots:
                 start_times.append( start_time_in_minutes(lecture_timeslot.get("weekday"), 
@@ -86,26 +88,26 @@ class Course_file_extractor:
 
         # each class session has its list of timeslots
         for class_session_json in class_session_jsons:
-
+            session_name =  class_session_json.get("name")
             class_session_timeslot_jsons = class_session_json.get("timeslot")
-            list_class_sessions.append( self.__make_class_sessions(
-                                                class_session_timeslot_jsons, curr_term) )
+            list_class_sessions.append( self.__make_class_sessions( \
+                                                session_name, \
+                                                class_session_timeslot_jsons, \
+                                                curr_term) )
         
         return list_class_sessions
     
         
-    def __make_class_sessions(self, class_session_timeslot_jsons: list[dict[str, Any]],
-                                      curr_term: int) -> Other_class_session:
-        session_names = []
+    def __make_class_sessions(self, 
+                              session_name: str, \
+                              class_session_timeslot_jsons: list[dict[str, Any]],\
+                              curr_term: int) -> Other_class_session:
         start_times = []
         global_start_times = []
         durations = []
         global_end_times = []
 
         for class_session_timeslot_json in class_session_timeslot_jsons:
-
-            session_names.append( class_session_timeslot_json.get("name"))
-            
             start_times.append( start_time_in_minutes(class_session_timeslot_json.get("weekday"), \
                                                       class_session_timeslot_json.get("time") ))
             
@@ -117,7 +119,7 @@ class Course_file_extractor:
 
             global_end_times.append( global_start_times[-1] + durations[-1] )
         
-        return Other_class_session(session_names, start_times, global_start_times,
+        return Other_class_session(session_name, start_times, global_start_times,
                                    global_end_times, durations)
     
     

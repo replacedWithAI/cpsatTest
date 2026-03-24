@@ -18,7 +18,7 @@ def start_time_in_minutes(weekday: str, start_time: str) -> int:
 
 # time relative in minutes relative to 10 days
 def time_in_ten_days_minutes(time: int, day: str, curr_term: str) -> int:
-    return (curr_term * 10080) + (day * 1440) + time # max 14400
+    return (curr_term * 7200) + (day * 1440) + time # max 14400
 
 def convert_day_into_number(day: str) -> int:
     if day == "M":
@@ -36,9 +36,10 @@ def convert_day_into_number(day: str) -> int:
         exit()
 
 def terms_in_this_section(term: str) -> list[int]:
-    if term == 'F' or 'S1':
+    # print(term)
+    if term == 'F' or term == 'S1':
         return [0]
-    elif term == 'W' or 'S2':
+    elif term == 'W' or term == 'S2':
         return [1]
-    elif term == 'Y' or 'SU':
+    elif term == 'Y' or term == 'SU':
         return [0, 1]
