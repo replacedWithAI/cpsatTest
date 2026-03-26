@@ -40,7 +40,8 @@ class Course_json_retriever:
         
 
     def __download_course_json_strings(self, department_data: list[dict[str, Any]], 
-            department_codes: list[str], course_codes: list[str]) -> list[dict[str, Any]]:
+                                       department_codes: list[str], 
+                                       course_codes: list[str]) -> list[dict[str, Any]]:
         course_json_strings = []
         index = 0
         
@@ -61,5 +62,4 @@ class Course_json_retriever:
 
 
     def get_course_jsons(self):
-        print(self.course_jsons)
         return self.course_jsons

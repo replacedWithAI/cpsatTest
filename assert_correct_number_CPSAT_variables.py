@@ -1,9 +1,12 @@
 import main
 from Scheduler.CPSAT.Make_CPSAT_variables import CPSAT_variable_maker
+from ortools.sat.python import cp_model
 
+model = cp_model.CpModel()
 main_obj = main
 courses = main_obj.Course_file_extractor.get_list_of_courses_data()
-CPSAT_variable_maker_obj = CPSAT_variable_maker(courses)
+CPSAT_variable_maker_obj = CPSAT_variable_maker(courses, model)
+
 start_time_variables = CPSAT_variable_maker_obj.start_time_variables
 is_present_variables = CPSAT_variable_maker_obj.is_present_variables
 interval_variables = CPSAT_variable_maker_obj.interval_variables
@@ -18,7 +21,9 @@ for course in courses:
         list_start_time_variables = start_time_variables[course.course_name][section.section_letter]
         list_is_present_variables = is_present_variables[course.course_name][section.section_letter]
         list_interval_variables = interval_variables[course.course_name][section.section_letter]
-        
+
+        print(isinstance(list_is_present_variables[0], int))
+
         print(course.course_name)
         print(section.section_letter)
 
@@ -42,7 +47,7 @@ for course in courses:
                 # print(list_is_present_variables)
                 loop_index += 1
 
-            print(loop_index)
+            #print(loop_index)
             print(num_is_present_variables)
             print(num_start_time_variables)
             if (num_is_present_variables) != loop_index:
@@ -56,6 +61,8 @@ for course in courses:
 print(start_time_variables)
 print(is_present_variables)
 print(interval_variables)
+
+
 
 print("Total number of is_present variables: " + str(total_num_is_present_variables))
 print("Total number of start_time variables: " + str(total_num_start_time_variables))
