@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-# from LabsOrTutorials import LabsOrTutorials
-from Scheduler.lib.Data_types.Lecture import Lecture
+from Scheduler.lib.Data_types.Class_sessions import Class_session
 
 @dataclass
 class Section:
     term: list[int]
     section_letter: str
     professor: str
-    lectures: Lecture
+    classes: list[Class_session]

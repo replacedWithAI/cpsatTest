@@ -1,5 +1,5 @@
  # time reletive to the num minutes in a day
-def start_time_in_minutes(weekday: str, start_time: str) -> int:
+def start_time_in_minutes(start_time: str, weekday: str, curr_term: int) -> list[int]:
     if (len(start_time) == 5):
         hour = int(start_time[:2])
         minutes = int(start_time[3:])
@@ -13,7 +13,7 @@ def start_time_in_minutes(weekday: str, start_time: str) -> int:
 
     start_time = hour*60 + minutes # max: 1440
     weekday_number = convert_day_into_number(weekday)
-    return [weekday_number, start_time]
+    return [start_time, weekday_number, curr_term]
 
 
 # time relative in minutes relative to 10 days
@@ -22,15 +22,15 @@ def time_in_ten_days_minutes(time: int, day: str, curr_term: str) -> int:
 
 def convert_day_into_number(day: str) -> int:
     if day == "M":
-        return int(0)
+        return 0
     elif day == "T":
-        return int(1)
+        return 1
     elif day == "W":
-        return int(2)
+        return 2
     elif day == "R":
-        return int(3)
+        return 3
     elif day == "F": 
-        return int(4)
+        return 4
     else:
         print("Day isn't any of these: " + day)
         exit()

@@ -1,7 +1,7 @@
 from typing import Any
 from Scheduler.lib.Data_types.Course import Course
 from Scheduler.lib.Data_types.Sections import Section
-from Scheduler.lib.Data_types.Lecture import Lecture
+from Scheduler.lib.Data_types.Class_sessions import Class_session
 from ortools.sat.python import cp_model
 
 # might want to put this in lib, but that's for a while later
@@ -18,7 +18,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                                                      dict[dict[str, list[Any]]]:        
         start_time_variables = {
             course.course_name: {
-                section.section_letter: self.__classes_start_times(section.lectures, \
+                section.section_letter: self.__classes_start_times(section.classes, \
                                                     (course.department + "_" 
                                                      + course.course_code), \
                                                     section.section_letter)
@@ -30,20 +30,16 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         return start_time_variables
     
 
-    def __classes_start_times(self, lecture: Lecture, 
+    def __classes_start_times(self, classes, 
                               course_name: str, 
                               section_letter: str) -> list[Any]:
-        classes = []
-
-        for i in range(len(lecture.global_start_times)):
-            start_time_variable = lecture.global_start_times[i]
-            classes.append(start_time_variable)
-
-        for other_class in lecture.other_class_sessions:
-            for i in range(len(other_class.global_start_times)):
-
-                start_time_variable = other_class.global_start_times[i]
-            classes.append(start_time_variable)
+        curr_start_time = {
+            curr_class.activity_name: {
+                i: curr_class.global_start_times[i]
+                for i in range(len(classes.start_time))
+            }
+            for curr_class in classes
+        } 
 
         return classes
     
@@ -53,7 +49,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                                       -> dict[dict[str, list[Any]]]:
         is_present_variables = {
             course.course_name: {
-                section.section_letter: self.__classes_is_present(section.lectures, \
+                section.section_letter: self.__classes_is_present(section.classes, \
                                                    (course.department + "_"
                                                      + course.course_code), \
                                                     section.section_letter, 
@@ -67,27 +63,23 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
     
     
     def __classes_is_present(self, 
-                             lecture: Lecture, 
+                             classes: list[Class_session], 
                              course_name: str, \
                              section_letter: str, 
                              model: cp_model) -> list[Any]:
-        classes = []
+        curr_is_present = {
+            curr_class.activity_name: {
+                i: model.new_bool_var(f"{course_name}_section_" + \
+                                      f"{section_letter}_" + \
+                                      f"{curr_class.activity_name}" + \
+                                      f"_taken")
+                for i in range(len(classes.start_time))
+            
+            }
+            for curr_class in classes
+        } 
 
-        for i in range(len(lecture.global_start_times)):
-            is_present_variable = model.new_bool_var(f"{course_name}_section_" + \
-                                                     f"{section_letter}_lecture_taken")
-            classes.append(is_present_variable)
-
-        for other_class in lecture.other_class_sessions:
-            for i in range(len(other_class.global_start_times)):
-
-                is_present_variable = model.new_bool_var(f"{course_name}_section_" + \
-                                                         f"{section_letter}_" + \
-                                                         f"{other_class.activity_name}" + \
-                                                         f"_taken")
-                classes.append(is_present_variable)
-
-        return classes
+        return curr_is_present
     
     def __create_interval_variables(self,
                                     start_time_variables: dict[dict[str, list[Any]]],
@@ -104,7 +96,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                                             is_present_variables[course.course_name][section.section_letter],\
                                             course.course_name,\
                                             section.section_letter, \
-                                            section.lectures, \
+                                            section.classes, \
                                             model
                                         )
 
@@ -121,34 +113,21 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                             is_present_variables: list[Any], \
                             course_name:str, \
                             section_letter:str, \
-                            lecture: Lecture, \
+                            classes: list[Class_session], \
                             model: cp_model)-> list[Any]:
-        intervals = []
-        total_index = 0
-
-        for i in range(len(lecture.durations)):
-
-            intervals.append(model.new_optional_fixed_size_interval_var(
+        
+        curr_interval = {
+            curr_class.activity_name: {
+                i: model.new_optional_fixed_size_interval_var(
                             start = start_time_variables[i], \
-                            size = lecture.durations[i], \
+                            size = curr_class.durations[i], \
                             is_present = is_present_variables[i], \
                             name = f"{course_name}_section_{section_letter}_" \
                                 + f"lecture_interval" \
-                            ))
-            total_index += 1
-
-        class_sessions = lecture.other_class_sessions
-
-        for class_session in class_sessions:
-            for j in range (len(class_session.duration)):
-                  
-                  intervals.append(model.new_optional_fixed_size_interval_var(
-                          name = f"{course_name}_section_{section_letter}_" \
-                               + f"other_class_interval", \
-                          start = start_time_variables[total_index], \
-                          size = lecture.durations[j], \
-                          is_present = is_present_variables[total_index], \
-                     ))
-                  total_index += 1
+                            )
+                for i in range(len(curr_class.start_time))
+            }
+            for curr_class in classes
+        }
         
-        return intervals
+        return curr_interval
