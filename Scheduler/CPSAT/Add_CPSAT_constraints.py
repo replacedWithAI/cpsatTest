@@ -11,7 +11,8 @@ class Contraint_adder:
         self.__add_no_overlap_constraint(interval_variables, courses, model)
     
 
-    def __link_local_global_start()
+    def __link_local_global_start():
+        return
         
     def __add_no_overlap_constraint(self, 
                                     interval_variables: dict[dict[str, list[any]]], \

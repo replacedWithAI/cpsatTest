@@ -16,24 +16,28 @@ def start_time_in_minutes(start_time: str, weekday: str, curr_term: int) -> list
     return [start_time, weekday_number, curr_term]
 
 
-# time relative in minutes relative to 10 days
-def time_in_ten_days_minutes(time: int, day: str, curr_term: str) -> int:
-    return (curr_term * 7200) + (day * 1440) + time # max 14400
-
-def convert_day_into_number(day: str) -> int:
-    if day == "M":
+def convert_day_into_number(weekday: str) -> int:
+    if weekday == "M":
         return 0
-    elif day == "T":
+    elif weekday == "T":
         return 1
-    elif day == "W":
+    elif weekday == "W":
         return 2
-    elif day == "R":
+    elif weekday == "R":
         return 3
-    elif day == "F": 
+    elif weekday == "F": 
         return 4
     else:
-        print("Day isn't any of these: " + day)
+        print("Day isn't any of these: " + str(weekday))
         exit()
+
+
+def time_in_ten_days_minutes(time: int, day: int, curr_term: int) -> int:
+    print(curr_term)
+    print(day)
+    print(time)
+    return (curr_term * 7200) + (day * 1440) + time # max 14400
+
 
 def terms_in_this_section(term: str) -> list[int]:
     # print(term)

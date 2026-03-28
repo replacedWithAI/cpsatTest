@@ -51,7 +51,7 @@ class Course_file_extractor:
 
     def __make_class_obj(self, \
                          class_session_jsons: list[dict[str, Any]], \
-                         curr_term: int)-> list[Class_session]: #feel like name should be less abstract
+                         term: list[int])-> list[Class_session]: #feel like name should be less abstract
         list_class_sessions = []
 
         # each class session has its list of timeslots
@@ -60,7 +60,7 @@ class Course_file_extractor:
             class_session_timeslot_jsons = class_session_json.get("timeslot")
             list_class_sessions.append( self.__make_class_sessions( session_name, \
                                                                     class_session_timeslot_jsons, \
-                                                                    curr_term) )
+                                                                    term) )
         
         return list_class_sessions
     
@@ -68,28 +68,27 @@ class Course_file_extractor:
     def __make_class_sessions(self, 
                               session_name: str, \
                               class_session_timeslot_jsons: list[dict[str, Any]],\
-                              curr_term: int) -> Class_session:
+                              term: list[int]) -> Class_session:
         start_times = []
         global_start_times = []
         durations = []
         global_end_times = []
         campus = []
+        for curr_term in term:
+            for class_session_timeslot_json in class_session_timeslot_jsons:
+                start_times.append( start_time_in_minutes( class_session_timeslot_json.get("time"), \
+                                                            class_session_timeslot_json.get("weekday"), \
+                                                            curr_term) )
+                
+                global_start_times.append( time_in_ten_days_minutes(start_times[-1][0],
+                                            start_times[-1][1],
+                                            curr_term) )
+                
+                durations.append(int( class_session_timeslot_json.get("duration") ))
 
-        for class_session_timeslot_json in class_session_timeslot_jsons:
-            start_times.append( start_time_in_minutes( class_session_timeslot_json.get("time") , 
-                                                        convert_day_into_number( 
-                                                                class_session_timeslot_json.get("weekday") ), \
-                                                        curr_term) )
-            
-            global_start_times.append( time_in_ten_days_minutes(start_times[-1][1],
-                                        start_times[-1][0],
-                                        curr_term) )
-            
-            durations.append(int( class_session_timeslot_json.get("duration") ))
+                global_end_times.append( global_start_times[-1] + durations[-1] )
 
-            global_end_times.append( global_start_times[-1] + durations[-1] )
-
-            campus.append( class_session_timeslot_json.get("campus"))
+                campus.append( class_session_timeslot_json.get("campus") )  
         
         return Class_session(session_name, start_times, global_start_times,
                                    global_end_times, durations, campus)

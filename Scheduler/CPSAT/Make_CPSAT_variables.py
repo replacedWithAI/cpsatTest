@@ -36,12 +36,12 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         curr_start_time = {
             curr_class.activity_name: {
                 i: curr_class.global_start_times[i]
-                for i in range(len(classes.start_time))
+                for i in range(len(curr_class.start_times))
             }
             for curr_class in classes
         } 
 
-        return classes
+        return curr_start_time
     
 
     def __create_is_present_variables(self, courses: list[Course], 
@@ -73,8 +73,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                                       f"{section_letter}_" + \
                                       f"{curr_class.activity_name}" + \
                                       f"_taken")
-                for i in range(len(classes.start_time))
-            
+                for i in range(len(curr_class.start_times))
             }
             for curr_class in classes
         } 
@@ -119,13 +118,13 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         curr_interval = {
             curr_class.activity_name: {
                 i: model.new_optional_fixed_size_interval_var(
-                            start = start_time_variables[i], \
-                            size = curr_class.durations[i], \
-                            is_present = is_present_variables[i], \
+                            start = start_time_variables[curr_class.activity_name][i], \
+                            size = curr_class.duration[i], \
+                            is_present = is_present_variables[curr_class.activity_name][i], \
                             name = f"{course_name}_section_{section_letter}_" \
                                 + f"lecture_interval" \
                             )
-                for i in range(len(curr_class.start_time))
+                for i in range(len(curr_class.start_times))
             }
             for curr_class in classes
         }
