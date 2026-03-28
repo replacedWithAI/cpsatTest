@@ -30,9 +30,8 @@ for course in courses:
                                                         [section.section_letter] \
                                                         [curr_class.activity_name] \
                                                         
-
-            print(course.course_name)
-            print(section.section_letter)
+            #print(course.course_name)
+            #print(section.section_letter)
 
             num_start_time_variables = len(list_start_time_variables)
             num_is_present_variables = len(list_is_present_variables)
@@ -68,8 +67,6 @@ for course in courses:
 print(start_time_variables)
 print(is_present_variables)
 print(interval_variables)
-
-
 
 print("Total number of is_present variables: " + str(total_num_is_present_variables))
 print("Total number of start_time variables: " + str(total_num_start_time_variables))

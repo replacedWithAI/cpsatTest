@@ -1,4 +1,5 @@
 from typing import Any
+import operator as op
 from Scheduler.lib.Data_types.Course import Course
 from Scheduler.lib.Data_types.Sections import Section
 from Scheduler.lib.Data_types.Class_sessions import Class_session
@@ -30,13 +31,18 @@ class Course_file_extractor:
         Sections = []
 
         for section_json in section_jsons:
+            print(section_json.get("section"))
             class_session_jsons = section_json.get("classes")
             term = terms_in_this_section( section_json.get("term") )
+            section_classes = self.__make_class_obj(class_session_jsons, term)
+
+            if (len(section_classes) == 0):
+                continue
+
             section_obj = Section( term, \
                                    section_json.get("section"), \
                                    self.__get_section_professor(class_session_jsons), \
-                                   self.__make_class_obj(class_session_jsons, \
-                                                           term) )
+                                   section_classes )
             Sections.append(section_obj)
 
         return Sections
@@ -57,6 +63,9 @@ class Course_file_extractor:
         # each class session has its list of timeslots
         for class_session_json in class_session_jsons:
             session_name =  class_session_json.get("name")
+            if (op.contains(session_name, "99")): # no one likes lab 99. Im sorry
+                continue
+
             class_session_timeslot_jsons = class_session_json.get("timeslot")
             list_class_sessions.append( self.__make_class_sessions( session_name, \
                                                                     class_session_timeslot_jsons, \
@@ -76,7 +85,12 @@ class Course_file_extractor:
         campus = []
         for curr_term in term:
             for class_session_timeslot_json in class_session_timeslot_jsons:
-                start_times.append( start_time_in_minutes( class_session_timeslot_json.get("time"), \
+
+                time = class_session_timeslot_json.get("time")
+                if (time == ""):
+                    continue
+                
+                start_times.append( start_time_in_minutes(  time, \
                                                             class_session_timeslot_json.get("weekday"), \
                                                             curr_term) )
                 

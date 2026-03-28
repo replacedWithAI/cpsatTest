@@ -1,9 +1,8 @@
-from typing import Any
 from Scheduler.lib.Data_types.Course import Course
 from Scheduler.lib.Data_types.Sections import Section
 from Scheduler.lib.Data_types.Class_sessions import Class_session
 from ortools.sat.python import cp_model
-
+from typing import Any
 # might want to put this in lib, but that's for a while later
 class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully you learnt HTML?
     def __init__(self, courses, model):
@@ -33,7 +32,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
     def __classes_start_times(self, classes, 
                               course_name: str, 
                               section_letter: str) -> list[Any]:
-        curr_start_time = {
+        section_start_times = {
             curr_class.activity_name: {
                 i: curr_class.global_start_times[i]
                 for i in range(len(curr_class.start_times))
@@ -41,7 +40,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
             for curr_class in classes
         } 
 
-        return curr_start_time
+        return section_start_times
     
 
     def __create_is_present_variables(self, courses: list[Course], 
@@ -50,7 +49,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         is_present_variables = {
             course.course_name: {
                 section.section_letter: self.__classes_is_present(section.classes, \
-                                                   (course.department + "_"
+                                                   (course.department + " "
                                                      + course.course_code), \
                                                     section.section_letter, 
                                                     model)
@@ -67,19 +66,44 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                              course_name: str, \
                              section_letter: str, 
                              model: cp_model) -> list[Any]:
-        curr_is_present = {
-            curr_class.activity_name: {
-                i: model.new_bool_var(f"{course_name}_section_" + \
-                                      f"{section_letter}_" + \
-                                      f"{curr_class.activity_name}" + \
-                                      f"_taken")
-                for i in range(len(curr_class.start_times))
-            }
-            for curr_class in classes
-        } 
+        
+        section_is_present = model.new_bool_var(f"{course_name}_section_" + \
+                                                f"{section_letter}_" + \
+                                                f"taken")
+        section_presence = {}
+        fixed_section_classes = self.__classes_use_section_is_present(classes)
 
-        return curr_is_present
+        for curr_class in classes:
+            curr_class_presence = {curr_class.activity_name: {}}
+
+            if curr_class.activity_name in fixed_section_classes or \
+               curr_class == classes[0]:
+                CPSAT_bool = section_is_present
+            else:
+                CPSAT_bool = model.new_bool_var(f"{course_name}_section_" + \
+                                                f"{section_letter}_" + \
+                                                f"{curr_class.activity_name}" + \
+                                                f"_taken")
+            
+            for i in range(len(curr_class.start_times)):
+                curr_class_presence[curr_class.activity_name][i] = CPSAT_bool
+            section_presence.update(curr_class_presence)
+
+        return section_presence
     
+
+    def __classes_use_section_is_present(self,
+                                         classes: list[Class_session]):
+        fixed_section_classes = []
+        for i in range(1, len(classes)):
+
+            if (i+1 != len(classes) and "01" in classes[i].activity_name
+                and "01" in classes[i+1].activity_name):
+                fixed_section_classes.append(classes[i].activity_name)
+
+        return fixed_section_classes
+
+
     def __create_interval_variables(self,
                                     start_time_variables: dict[dict[str, list[Any]]],
                                     is_present_variables: dict[dict[str, list[Any]]],
@@ -91,9 +115,11 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
             course.course_name: {
                 section.section_letter: self.__classes_intervals
                                         ( \
-                                            start_time_variables[course.course_name][section.section_letter], \
-                                            is_present_variables[course.course_name][section.section_letter],\
-                                            course.course_name,\
+                                            start_time_variables[course.course_name]
+                                                                [section.section_letter], \
+                                            is_present_variables[course.course_name]
+                                                                [section.section_letter],\
+                                            (course.department + " " + course.course_code),\
                                             section.section_letter, \
                                             section.classes, \
                                             model

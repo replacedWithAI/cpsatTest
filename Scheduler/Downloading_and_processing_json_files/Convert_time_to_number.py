@@ -1,3 +1,4 @@
+import operator as op
  # time reletive to the num minutes in a day
 def start_time_in_minutes(start_time: str, weekday: str, curr_term: int) -> list[int]:
     if (len(start_time) == 5):
@@ -29,21 +30,27 @@ def convert_day_into_number(weekday: str) -> int:
         return 4
     else:
         print("Day isn't any of these: " + str(weekday))
-        exit()
+        return 0
 
 
 def time_in_ten_days_minutes(time: int, day: int, curr_term: int) -> int:
-    print(curr_term)
-    print(day)
-    print(time)
+    # print(curr_term)
+    # print(day)
+    # print(time)
     return (curr_term * 7200) + (day * 1440) + time # max 14400
 
 
 def terms_in_this_section(term: str) -> list[int]:
     # print(term)
-    if term == 'F' or term == 'S1':
+    if term == "F" or term == "S1":
         return [0]
-    elif term == 'W' or term == 'S2':
+    elif term == "W" or term == "S2":
         return [1]
-    elif term == 'Y' or term == 'SU':
+    elif term == "Y" or term == "SU":
         return [0, 1]
+    elif op.contains(term, "L"):
+        print("Special term; block model or WL")
+        return [0]
+    else:
+        print("No considered term")
+        return [0]
