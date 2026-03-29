@@ -8,10 +8,14 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
     def __init__(self, courses, model):
         self.start_time_variables = self.__create_start_time_variables(courses)
         self.is_present_variables = self.__create_is_present_variables(courses, model)
-        self.interval_variables = self.__create_interval_variables(self.start_time_variables, \
-                                                                   self.is_present_variables, \
-                                                                   courses, \
+        self.interval_variables = self.__create_interval_variables(self.start_time_variables,
+                                                                   self.is_present_variables,
+                                                                   courses,
                                                                    model)
+        
+        self.intervals_by_day = self.__group_intervals_by_day(self.interval_variables, courses)
+        self.days_present = self.__make_is_present_for_days(model)
+
 
     def __create_start_time_variables(self, courses: list[Course]) -> \
                                                      dict[dict[str, list[Any]]]:        
@@ -156,3 +160,61 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         }
         
         return curr_interval
+    
+
+    def __group_intervals_by_day(self,
+                                 interval_variables: dict[dict[dict[int, Any]]],
+                                 courses: list[Course]
+                                 ) -> list[dict[str, list]]:
+                
+        days = {"Mon1": [], "Tue1": [], "Wed1": [], "Thu1": [], "Fri1": [],
+                "Mon2": [], "Tue2": [], "Wed2": [], "Thu2": [], "Fri2": []}
+        
+        for course in courses:
+            for section in course.sections:
+                for curr_class in section.classes:
+                    for i in range(len(interval_variables[course.course_name]
+                                                        [section.section_letter]
+                                                        [curr_class.activity_name])):
+                        
+                        days_key = self.__get_curr_day(curr_class.start_times[i][1])
+                        days_key += self.__get_current_term(curr_class.start_times[i][2])
+                        days[days_key].append(interval_variables[course.course_name]
+                                                                [section.section_letter]
+                                                                [curr_class.activity_name]
+                                                                [i])
+        return days
+
+
+    def __get_curr_day(self, day: int) -> str:
+        if (day == 0):
+            return "Mon"
+        elif (day == 1):
+            return "Tue"
+        elif (day == 2):
+            return "Wed"
+        elif (day == 3):
+            return "Thu"
+        elif (day == 4):
+            return "Fri"
+        else:
+            print("Current day is unreadable: " + str(day))
+            return "Mon"
+
+
+    def __get_current_term(self, term: int) -> str:
+        if (term == 0):
+            return "1"
+        elif (term == 1):
+            return "2"
+        else:
+            print("Current day is unreadable: " + str(term))
+            return "1"
+        
+    def __make_is_present_for_days(self, model: cp_model):
+        days_present = []
+
+        for d in range(10):
+            days_present.append(model.new_bool_var(f"day_{d}_used"))
+        return days_present
+            

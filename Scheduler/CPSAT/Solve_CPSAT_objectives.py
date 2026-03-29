@@ -1,0 +1,45 @@
+from typing import Any
+from ortools.sat.python import cp_model
+class Solve_best_schedule:
+    def __init__(self, 
+                 intervals_by_day: dict[str, list[Any]], 
+                 days_present: list[Any], 
+                 model: cp_model, 
+                 commute_time: int = 0):
+        self.__convert_global_to_local_time(intervals_by_day, days_present, 
+                                            model, commute_time)
+
+    def __solve_minimal_dead_times():
+        return
+
+    
+    def __convert_global_to_local_time(intervals_by_day: dict[str, list[Any]],
+                                       days_present: list[Any],
+                                       model: cp_model,
+                                       commute_time: int = 0):
+        curr_day_index = 0
+        all_daily_school_day_length = []
+
+        for curr_day, intervals in intervals_by_day:
+            day_start = model.new_int_var(0, 1440, f"{curr_day}_start")
+            day_end = model.new_int_var(0, 1440, f"{curr_day}_end")
+            school_day_length = model.new_int_var(0, 1440, f"{curr_day}_length")
+
+            for interval in intervals:
+                interval_start = interval.start_expr()
+                interval_end = interval_start + interval.size_expr()
+                interval_present = interval.presence_literal[0]
+
+                model.add(day_start <= interval_start).only_enforce_if(interval_present)
+                model.add(day_end >= interval_end).only_enforce_if(interval_present)
+        
+            model.add(school_day_length == day_end-day_start + commute_time*2) \
+                                    .only_enforce_if(days_present[curr_day_index])
+            
+            curr_day_index += 1
+            all_daily_school_day_length.append(school_day_length)
+
+        model.minimize(sum(all_daily_school_day_length))
+
+
+        return

@@ -1,4 +1,3 @@
-from Group_intervals_by_day import group_intervals_by_day
 from lib.Data_types.Course import Course
 from lib.Data_types.Class_sessions import Class_session
 from typing import Any
@@ -6,17 +5,22 @@ from ortools.sat.python import cp_model
 
 class Constraint_adder:
     def __init__(self,
-                 is_present_variables: dict[dict[dict[int, Any]]], 
+                 unavailable_hours: list[str, list[int, int]],
+                 intervals_by_day: dict[str, list[Any]],
+                 days_present: list[Any],
                  interval_variables: dict[dict[dict[int, Any]]], 
                  courses: list[Course], 
                  model: cp_model):
         
         self.__add_no_overlap_constraint(interval_variables, courses, model)
+        self.__add_section_per_course_constraint(interval_variables, courses, model)
+        self.__add_unavailable_hours_constraint(unavailable_hours, intervals_by_day, model)
+        self.__track_used_days(days_present, intervals_by_day)
 
-    def __add_one_section_per_course(self, 
-                                     is_present_variables: dict[dict[dict[int, Any]]], 
-                                     courses: list[Course], 
-                                     model: cp_model):
+    def __add_section_per_course_constraint(self, 
+                                            interval_variables: dict[dict[dict[int, Any]]], 
+                                            courses: list[Course], 
+                                            model: cp_model):
         for course in courses:
             course_name = course.department + " " + course.course_code
             model.add(sum(sections_available) == 1)
@@ -26,14 +30,13 @@ class Constraint_adder:
                 section_letter = section_letter
                 classes = section.classes
 
-                # each section has a lecture; use lecture's presence variable
-                curr_section_presence = is_present_variables[course_name] \
-                                                         [section_letter] \
-                                                         [classes[0]] \
-                                                         [0]
-                sections_available.append(curr_section_presence)
+                lecture_interval = interval_variables[course_name] \
+                                                     [section_letter] \
+                                                     [classes[0]]
+                lecture_is_present = lecture_interval[0].presence_literals()[0]
+                curr_section_presence = lecture_is_present
 
-                self.__add_one_lab_tutorial_per_section(is_present_variables,
+                self.__add_one_lab_tutorial_per_section(interval_variables,
                                                         curr_section_presence, 
                                                         course_name, 
                                                         section_letter, 
@@ -42,7 +45,7 @@ class Constraint_adder:
                 
         
     def __add_one_lab_tutorial_per_section(self,
-                                           is_present_variables: dict[dict[dict[int, Any]]], 
+                                           interval_variables: dict[dict[dict[int, Any]]], 
                                            curr_section_presence: Any, 
                                            course_name: str, 
                                            section_letter: str, 
@@ -54,10 +57,11 @@ class Constraint_adder:
         for i in range(len(classes)):
             for j in range(len(classes[i].start_times)):
 
-                curr_is_present_variable = is_present_variables[course_name] \
-                                                               [section_letter] \
-                                                               [classes[i].activity_name] \
-                                                               [j]
+                curr_is_present_variable = interval_variables[course_name] \
+                                                             [section_letter] \
+                                                             [classes[i].activity_name] \
+                                                             [j] \
+                                                             .presence_literals()[0]
                 
                 is_chooseable_class = (curr_section_presence != curr_is_present_variable)
                 if (is_chooseable_class):
@@ -72,8 +76,7 @@ class Constraint_adder:
 
         for i in range(len(chooseable_classes)):
             model.add(sum(chooseable_classes[i]) == curr_section_presence)
-                
-
+    
 
     def __add_no_overlap_constraint(self, 
                                     interval_variables: dict[dict[dict[int, Any]]], 
@@ -89,4 +92,40 @@ class Constraint_adder:
                         model.add_no_overlap(interval)
         return
     
-    
+
+    def __add_unavailable_hours_constraint(self,
+                                           unavailable_hours: list[str, list[int, int]],
+                                           intervals_by_days: dict[Any],
+                                           model: cp_model
+                                           ):
+
+
+        for interval in intervals_by_days[unavailable_hours[0]]: # will need clean up
+            unavailable_start = unavailable_hours[1][0]
+            unavailable_end = unavailable_hours[1][1]
+
+            interval_in_unavailable_time = (interval.start_expr() >= unavailable_start) \
+                                            and (interval.start_expr() + interval.size_expr() \
+                                            <= unavailable_end)
+            if (interval_in_unavailable_time):
+                model.add_bool_and(interval.presence_literals[0]) # set bool = 0
+
+
+    def __track_used_days(self, 
+                          days_present: list[Any], 
+                          intervals_by_days: dict[str, list[Any]],
+                          model: cp_model):
+        curr_day = -1
+
+        for intervals in intervals_by_days.values():
+            curr_day += 1
+            curr_day_intervals = []
+
+            for interval in intervals:
+                interval_is_present = interval.presence_literal[0]
+                curr_day_intervals.append(interval_is_present)
+            model.add_max_equality(days_present[curr_day], curr_day_intervals)
+
+        return
+        
+                
