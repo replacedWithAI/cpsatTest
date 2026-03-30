@@ -5,22 +5,33 @@ class Solve_best_schedule:
                  intervals_by_day: dict[str, list[Any]], 
                  days_present: list[Any], 
                  model: cp_model, 
+                 solver: cp_model,
                  commute_time: int = 0):
-        self.__convert_global_to_local_time(intervals_by_day, days_present, 
-                                            model, commute_time)
-
-    def __solve_minimal_dead_times():
-        return
-
     
-    def __convert_global_to_local_time(intervals_by_day: dict[str, list[Any]],
-                                       days_present: list[Any],
-                                       model: cp_model,
-                                       commute_time: int = 0):
+        self.__objective_priority(intervals_by_day, days_present, model, solver,
+                                  commute_time)
+
+
+    def __objective_priority(self, 
+                             intervals_by_day: dict[str, list[Any]], 
+                             days_present: list[Any], 
+                             model: cp_model, 
+                             solver: cp_model,
+                             commute_time: int = 0): #WIP
+        self.__solve_minimal_dead_times(intervals_by_day, days_present, 
+                                        model, commute_time)
+        solver.solve(model)
+    
+
+    def __solve_minimal_dead_times(self,
+                                   intervals_by_day: dict[str, list[Any]],
+                                   days_present: list[Any],
+                                   model: cp_model,
+                                   commute_time: int = 0):
         curr_day_index = 0
         all_daily_school_day_length = []
 
-        for curr_day, intervals in intervals_by_day:
+        for curr_day, intervals in intervals_by_day.items():
             day_start = model.new_int_var(0, 1440, f"{curr_day}_start")
             day_end = model.new_int_var(0, 1440, f"{curr_day}_end")
             school_day_length = model.new_int_var(0, 1440, f"{curr_day}_length")
@@ -28,7 +39,7 @@ class Solve_best_schedule:
             for interval in intervals:
                 interval_start = interval.start_expr()
                 interval_end = interval_start + interval.size_expr()
-                interval_present = interval.presence_literal[0]
+                interval_present = interval.presence_literals()[0]
 
                 model.add(day_start <= interval_start).only_enforce_if(interval_present)
                 model.add(day_end >= interval_end).only_enforce_if(interval_present)
@@ -40,6 +51,4 @@ class Solve_best_schedule:
             all_daily_school_day_length.append(school_day_length)
 
         model.minimize(sum(all_daily_school_day_length))
-
-
         return

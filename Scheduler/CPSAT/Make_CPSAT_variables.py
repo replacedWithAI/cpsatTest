@@ -152,7 +152,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                             size = curr_class.duration[i], \
                             is_present = is_present_variables[curr_class.activity_name][i], \
                             name = f"{course_name}_section_{section_letter}_" \
-                                + f"lecture_interval" \
+                                 + f"{curr_class.activity_name}_interval" \
                             )
                 for i in range(len(curr_class.start_times))
             }

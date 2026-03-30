@@ -16,6 +16,7 @@ print(requested_courses)
 
 Course_json_retriever = Course_json_retriever(department_json_path, requested_courses)
 course_jsons = Course_json_retriever.get_course_jsons()
+print(course_jsons)
 del Course_json_retriever
         
 Course_file_extractor = Course_file_extractor(course_jsons)

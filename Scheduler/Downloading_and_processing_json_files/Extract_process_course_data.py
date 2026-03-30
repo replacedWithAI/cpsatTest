@@ -95,17 +95,17 @@ class Course_file_extractor:
                                                             curr_term) )
                 
                 global_start_times.append( time_in_ten_days_minutes(start_times[-1][0],
-                                            start_times[-1][1],
-                                            curr_term) )
+                                                                    start_times[-1][1],
+                                                                    curr_term) )
                 
                 durations.append(int( class_session_timeslot_json.get("duration") ))
 
                 global_end_times.append( global_start_times[-1] + durations[-1] )
 
                 campus.append( class_session_timeslot_json.get("campus") )  
-        
+        print(durations)
         return Class_session(session_name, start_times, global_start_times,
-                                   global_end_times, durations, campus)
+                             durations, global_end_times, campus)
     
     
     def get_list_of_courses_data(self) -> Course:

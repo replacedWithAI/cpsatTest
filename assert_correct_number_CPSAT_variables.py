@@ -4,7 +4,9 @@ from ortools.sat.python import cp_model
 
 model = cp_model.CpModel()
 main_obj = main
-courses = main_obj.Course_file_extractor.get_list_of_courses_data()
+courses = main_obj.courses
+course_jsons = main_obj.course_jsons
+print(course_jsons)
 CPSAT_variable_maker_obj = CPSAT_variable_maker(courses, model)
 
 start_time_variables = CPSAT_variable_maker_obj.start_time_variables
