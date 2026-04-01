@@ -12,10 +12,10 @@ class Constraint_adder:
                  courses: list[Course], 
                  model: cp_model):
         
-        #self.__add_no_overlap_constraint(interval_variables, courses, model)
+        self.__add_no_overlap_constraint(interval_variables, courses, model)
         self.__add_section_per_course_constraint(interval_variables, courses, model)
-        #self.__add_unavailable_hours_constraint(unavailable_hours, intervals_by_day, model)
-        #self.__track_used_days(days_present, intervals_by_day, model)
+        self.__add_unavailable_hours_constraint(unavailable_hours, intervals_by_day, model)
+        self.__track_used_days(days_present, intervals_by_day, model)
 
     def __add_section_per_course_constraint(self, 
                                             interval_variables: dict[dict[dict[int, Any]]], 
@@ -36,14 +36,14 @@ class Constraint_adder:
                 lecture_is_present = lecture_intervals[0].presence_literals()[0]
                 curr_section_presence = lecture_is_present
                 sections_available.append(curr_section_presence)
-                '''
+                
                 self.__add_one_lab_tutorial_per_section(interval_variables,
                                                         curr_section_presence, 
                                                         course_name, 
                                                         section_letter, 
                                                         classes, 
                                                         model)
-                                                        '''
+                                                        
             #print(sections_available)
             model.add(sum(sections_available) == 1)
         return
