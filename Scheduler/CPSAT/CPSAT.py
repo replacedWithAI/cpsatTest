@@ -49,6 +49,7 @@ class Schedule_maker:
                          interval_variables, courses, model)
         return
         
+
     def __solve_for_objectives(self,
                                intervals_by_day: dict[str, list[Any]],
                                days_present: list[Any],
@@ -57,6 +58,7 @@ class Schedule_maker:
         solver = cp_model.CpSolver()
         solver.parameters.log_search_progress = True  # Enable logging
         Solve_best_schedule(intervals_by_day, days_present, model, solver, commute_times)
+        print(model.Validate())
         return
 
 

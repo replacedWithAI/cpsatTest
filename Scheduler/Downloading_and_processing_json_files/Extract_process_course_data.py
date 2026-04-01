@@ -31,7 +31,7 @@ class Course_file_extractor:
         Sections = []
 
         for section_json in section_jsons:
-            print(section_json.get("section"))
+
             class_session_jsons = section_json.get("classes")
             term = terms_in_this_section( section_json.get("term") )
             section_classes = self.__make_class_obj(class_session_jsons, term)
@@ -63,13 +63,18 @@ class Course_file_extractor:
         # each class session has its list of timeslots
         for class_session_json in class_session_jsons:
             session_name =  class_session_json.get("name")
-            if (op.contains(session_name, "99")): # no one likes lab 99. Im sorry
+            if ("99") in session_name: # no one likes lab 99. Im sorry
                 continue
 
             class_session_timeslot_jsons = class_session_json.get("timeslot")
-            list_class_sessions.append( self.__make_class_sessions( session_name, \
-                                                                    class_session_timeslot_jsons, \
-                                                                    term) )
+            curr_class_type = self.__make_class_sessions( session_name, \
+                                                          class_session_timeslot_jsons, \
+                                                          term) #LECT, LAB, etc
+            
+            if (curr_class_type.global_start_times == []): # never starts; meh method
+                continue
+            
+            list_class_sessions.append( curr_class_type )
         
         return list_class_sessions
     
@@ -87,6 +92,7 @@ class Course_file_extractor:
             for class_session_timeslot_json in class_session_timeslot_jsons:
 
                 time = class_session_timeslot_json.get("time")
+                # print(time)
                 if (time == ""):
                     continue
                 
@@ -103,7 +109,7 @@ class Course_file_extractor:
                 global_end_times.append( global_start_times[-1] + durations[-1] )
 
                 campus.append( class_session_timeslot_json.get("campus") )  
-        print(durations)
+
         return Class_session(session_name, start_times, global_start_times,
                              durations, global_end_times, campus)
     

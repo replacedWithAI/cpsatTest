@@ -105,6 +105,7 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                 and "01" in classes[i+1].activity_name):
                 fixed_section_classes.append(classes[i].activity_name)
 
+        print(fixed_section_classes)
         return fixed_section_classes
 
 
@@ -167,8 +168,8 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                                  courses: list[Course]
                                  ) -> list[dict[str, list]]:
                 
-        days = {"Mon1": [], "Tue1": [], "Wed1": [], "Thu1": [], "Fri1": [],
-                "Mon2": [], "Tue2": [], "Wed2": [], "Thu2": [], "Fri2": []}
+        intervals_by_days = {"Mon1": [], "Tue1": [], "Wed1": [], "Thu1": [], "Fri1": [],
+                             "Mon2": [], "Tue2": [], "Wed2": [], "Thu2": [], "Fri2": []}
         
         for course in courses:
             for section in course.sections:
@@ -179,11 +180,12 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                         
                         days_key = self.__get_curr_day(curr_class.start_times[i][1])
                         days_key += self.__get_current_term(curr_class.start_times[i][2])
-                        days[days_key].append(interval_variables[course.course_name]
+                        intervals_by_days [days_key].append(interval_variables[course.course_name]
                                                                 [section.section_letter]
                                                                 [curr_class.activity_name]
                                                                 [i])
-        return days
+        print(intervals_by_days)
+        return intervals_by_days 
 
 
     def __get_curr_day(self, day: int) -> str:

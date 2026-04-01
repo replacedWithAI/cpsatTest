@@ -32,20 +32,22 @@ class Solve_best_schedule:
         all_daily_school_day_length = []
 
         for curr_day, intervals in intervals_by_day.items():
+            if intervals == []:
+                continue
+
             day_start = model.new_int_var(0, 1440, f"{curr_day}_start")
             day_end = model.new_int_var(0, 1440, f"{curr_day}_end")
             school_day_length = model.new_int_var(0, 1440, f"{curr_day}_length")
 
             for interval in intervals:
-                interval_start = interval.start_expr()
-                interval_end = interval_start + interval.size_expr()
+                interval_local_start = interval.start_expr() % 1440 
+                interval_local_end = interval.end_expr() % 1440
                 interval_present = interval.presence_literals()[0]
 
-                model.add(day_start <= interval_start).only_enforce_if(interval_present)
-                model.add(day_end >= interval_end).only_enforce_if(interval_present)
-        
-            model.add(school_day_length == day_end-day_start + commute_time*2) \
-                                    .only_enforce_if(days_present[curr_day_index])
+                model.add(day_start <= interval_local_start).only_enforce_if(interval_present)
+                model.add(day_end >= interval_local_end).only_enforce_if(interval_present)
+            
+            model.add(school_day_length == (day_end-day_start + commute_time*2))
             
             curr_day_index += 1
             all_daily_school_day_length.append(school_day_length)

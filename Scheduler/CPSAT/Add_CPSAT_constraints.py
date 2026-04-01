@@ -12,10 +12,10 @@ class Constraint_adder:
                  courses: list[Course], 
                  model: cp_model):
         
-        self.__add_no_overlap_constraint(interval_variables, courses, model)
+        #self.__add_no_overlap_constraint(interval_variables, courses, model)
         self.__add_section_per_course_constraint(interval_variables, courses, model)
-        self.__add_unavailable_hours_constraint(unavailable_hours, intervals_by_day, model)
-        self.__track_used_days(days_present, intervals_by_day, model)
+        #self.__add_unavailable_hours_constraint(unavailable_hours, intervals_by_day, model)
+        #self.__track_used_days(days_present, intervals_by_day, model)
 
     def __add_section_per_course_constraint(self, 
                                             interval_variables: dict[dict[dict[int, Any]]], 
@@ -26,7 +26,7 @@ class Constraint_adder:
             sections_available = []
 
             for section in course.sections:
-                sections_available = []
+
                 section_letter = section.section_letter
                 classes = section.classes
 
@@ -36,13 +36,15 @@ class Constraint_adder:
                 lecture_is_present = lecture_intervals[0].presence_literals()[0]
                 curr_section_presence = lecture_is_present
                 sections_available.append(curr_section_presence)
-
+                '''
                 self.__add_one_lab_tutorial_per_section(interval_variables,
                                                         curr_section_presence, 
                                                         course_name, 
                                                         section_letter, 
                                                         classes, 
                                                         model)
+                                                        '''
+            #print(sections_available)
             model.add(sum(sections_available) == 1)
         return
                 
@@ -76,9 +78,11 @@ class Constraint_adder:
                     if (next_chooseable_class_is_unique):
                         num_unique_chooseable_classes += 1
                         chooseable_classes.append([])
-    
+
+        print(chooseable_classes)
         for unique_chooseable_class in chooseable_classes:
-            model.add(sum(unique_chooseable_class) == curr_section_presence)
+            if unique_chooseable_class != []:
+                model.add(sum(unique_chooseable_class) == curr_section_presence)
         return
     
 
@@ -117,7 +121,7 @@ class Constraint_adder:
                                             and (interval.start_expr() + interval.size_expr() \
                                             <= unavailable_end)
             if (interval_in_unavailable_time):
-                model.add_bool_and(interval.presence_literals[0]) # set bool = 0
+                model.add_bool_and(interval.presence_literals) # set bool = 0
         return
 
 
@@ -129,6 +133,9 @@ class Constraint_adder:
 
         for intervals in intervals_by_days.values():
             curr_day += 1
+            if intervals == []:
+                continue
+
             curr_day_intervals = []
 
             for interval in intervals:
