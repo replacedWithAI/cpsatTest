@@ -25,11 +25,13 @@ class Schedule_maker:
         status = self.__solve_for_objectives(intervals_by_day, days_present,
                                              model, solver, commute_times)
         
-        del self.intervals_by_day
-        del self.days_present
+        del start_time_variables
+        del intervals_by_day
+        del days_present
         
         self.all_chosen_classes = self.__extract_solver_values(courses, status,
-                                                               )
+                                                               interval_variables,
+                                                               model, solver)
     
 
     def __add_courses_to_CPSAT(self, courses: list[Course], model: cp_model

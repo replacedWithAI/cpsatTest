@@ -1,8 +1,8 @@
 from ortools.sat.python import cp_model
 from typing import Any
-from lib.Data_types.Course import Course
-from lib.Data_types.Sections import Section
-from lib.Data_types.Class_sessions import Class_session
+from Scheduler.lib.Data_types.Course import Course
+from Scheduler.lib.Data_types.Sections import Section
+from Scheduler.lib.Data_types.Class_sessions import Class_session
 
 class Solver_values_extractor:
     def __init__(self, 
@@ -13,8 +13,8 @@ class Solver_values_extractor:
                  solver: cp_model):
         
         self.__get_solver_status(status, model, solver)
-        self.all_chosen_classes = self.__get_taken_courses(courses, interval_variables, 
-                                                           solver)
+        self.all_chosen_classes = self.__get_chosen_courses(courses, interval_variables, 
+                                                            solver)
 
 
     def __get_solver_status(self, status: int, model: cp_model, solver: cp_model): 
@@ -51,7 +51,7 @@ class Solver_values_extractor:
             section_letter = section.section_letter
             classes = section.classes
             section_lecture = interval_variables[section_letter][classes[0].activity_name]
-            section_presence = section_lecture.presence_literals()[0]
+            section_presence = section_lecture[0].presence_literals()[0]
 
             section_is_chosen = (solver.value(section_presence) == 1)
             if section_is_chosen:
@@ -60,7 +60,6 @@ class Solver_values_extractor:
                 classes_intervals = interval_variables[section_letter]
                 chosen_classes = self.__get_chosen_classes(classes, 
                                                            classes_intervals,
-                                                           section_presence,
                                                            solver)
                 break
         return chosen_classes
