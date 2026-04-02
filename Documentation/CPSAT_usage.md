@@ -73,3 +73,7 @@ Define day_end as the time the last class ends
 These two equations will define "school_day_length", with a commute time penalty  
 Then, the overall goal is to minimize the sum of all school_day_lengths across all
 10 days of the semester
+
+## Extract_solver_values / extract_solver_values
+Gonna get the selected sections and classes by the solver
+If I wanna let it toggle classes, I gotta add it in get_taken_courses

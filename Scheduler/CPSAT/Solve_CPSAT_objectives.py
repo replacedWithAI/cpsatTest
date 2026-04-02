@@ -20,7 +20,6 @@ class Solve_best_schedule:
                              commute_time: int = 0): #WIP
         self.__solve_minimal_dead_times(intervals_by_day, days_present, 
                                         model, commute_time)
-        solver.solve(model)
     
 
     def __solve_minimal_dead_times(self,

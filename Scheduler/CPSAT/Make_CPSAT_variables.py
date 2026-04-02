@@ -17,14 +17,11 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         self.days_present = self.__make_is_present_for_days(model)
 
 
-    def __create_start_time_variables(self, courses: list[Course]) -> \
-                                                     dict[dict[str, list[Any]]]:        
+    def __create_start_time_variables(self, courses: list[Course]
+                                      ) -> dict[str, dict[str, dict[str, dict[int, Any]]]]: 
         start_time_variables = {
             course.course_name: {
-                section.section_letter: self.__classes_start_times(section.classes, \
-                                                    (course.department + "_" 
-                                                     + course.course_code), \
-                                                    section.section_letter)
+                section.section_letter: self.__classes_start_times(section.classes)
                 for section in course.sections
             }
             for course in courses
@@ -33,9 +30,8 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         return start_time_variables
     
 
-    def __classes_start_times(self, classes, 
-                              course_name: str, 
-                              section_letter: str) -> list[Any]:
+    def __classes_start_times(self, classes: list[Course]
+                              ) -> dict[str, dict[str, dict[str, dict[int, Any]]]]:
         section_start_times = {
             curr_class.activity_name: {
                 i: curr_class.global_start_times[i]
@@ -47,9 +43,10 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         return section_start_times
     
 
-    def __create_is_present_variables(self, courses: list[Course], 
-                                      model: cp_model) \
-                                      -> dict[dict[str, list[Any]]]:
+    def __create_is_present_variables(self, 
+                                      courses: list[Course], 
+                                      model: cp_model
+                                      ) -> dict[str, dict[str, dict[str, dict[int, Any]]]]:
         is_present_variables = {
             course.course_name: {
                 section.section_letter: self.__classes_is_present(section.classes, \
@@ -69,13 +66,13 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
                              classes: list[Class_session], 
                              course_name: str, \
                              section_letter: str, 
-                             model: cp_model) -> list[Any]:
+                             model: cp_model) -> dict[str, dict[int, Any]]:
         
         section_is_present = model.new_bool_var(f"{course_name}_section_" + \
                                                 f"{section_letter}_" + \
                                                 f"taken")
         section_presence = {}
-        fixed_section_classes = self.__classes_use_section_is_present(classes)
+        fixed_section_classes = self.__non_chooseable_classes_is_present(classes)
 
         for curr_class in classes:
             curr_class_presence = {curr_class.activity_name: {}}
@@ -96,8 +93,9 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         return section_presence
     
 
-    def __classes_use_section_is_present(self,
-                                         classes: list[Class_session]):
+    def __non_chooseable_classes_is_present(self,
+                                            classes: list[Class_session]
+                                            ) -> list[str]:
         fixed_section_classes = []
         for i in range(1, len(classes)):
 
@@ -110,11 +108,13 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
 
 
     def __create_interval_variables(self,
-                                    start_time_variables: dict[dict[str, list[Any]]],
-                                    is_present_variables: dict[dict[str, list[Any]]],
-                                    courses: list[Course], \
-                                    model: cp_model) \
-                                    -> dict[dict[str, list[Any]]]:
+                                    start_time_variables: dict[str, dict[str, dict
+                                                              [str, dict[int, Any]]]],
+                                    is_present_variables: dict[str, dict[str, dict
+                                                              [str, dict[int, Any]]]],
+                                    courses: list[Course],
+                                    model: cp_model
+                                    ) -> dict[str, dict[str, dict[str, dict[int, Any]]]]:
         
         interval_variables = {
             course.course_name: {
@@ -138,13 +138,14 @@ class CPSAT_variable_maker: # I am so sorry, there's so much nesting. Hopefully 
         return interval_variables
 
 
-    def __classes_intervals(self, \
-                            start_time_variables: list[Any], \
-                            is_present_variables: list[Any], \
-                            course_name:str, \
-                            section_letter:str, \
-                            classes: list[Class_session], \
-                            model: cp_model)-> list[Any]:
+    def __classes_intervals(self, 
+                            start_time_variables: list[Any], 
+                            is_present_variables: list[Any], 
+                            course_name:str, 
+                            section_letter:str, 
+                            classes: list[Class_session], 
+                            model: cp_model
+                            ) ->  dict[str, dict[int, Any]]:
         
         curr_interval = {
             curr_class.activity_name: {

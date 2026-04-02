@@ -18,7 +18,8 @@ class Constraint_adder:
         self.__track_used_days(days_present, intervals_by_day, model)
 
     def __add_section_per_course_constraint(self, 
-                                            interval_variables: dict[dict[dict[int, Any]]], 
+                                            interval_variables: dict[str, dict[str, dict
+                                                                    [str, dict[int, Any]]]], 
                                             courses: list[Course], 
                                             model: cp_model):
         for course in courses:
@@ -50,7 +51,8 @@ class Constraint_adder:
                 
         
     def __add_one_lab_tutorial_per_section(self,
-                                           interval_variables: dict[dict[dict[int, Any]]], 
+                                           interval_variables: dict[str, dict[str, dict
+                                                                   [str, dict[int, Any]]]], 
                                            curr_section_presence: Any, 
                                            course_name: str, 
                                            section_letter: str, 
@@ -87,7 +89,8 @@ class Constraint_adder:
     
 
     def __add_no_overlap_constraint(self, 
-                                    interval_variables: dict[dict[dict[int, Any]]], 
+                                    interval_variables: dict[str, dict[str, dict
+                                                            [str, dict[int, Any]]]], 
                                     courses: list[Course], 
                                     model: cp_model):
         list_of_intervals = [] # yes. your ram is crying. I know
@@ -121,7 +124,7 @@ class Constraint_adder:
                                             and (interval.start_expr() + interval.size_expr() \
                                             <= unavailable_end)
             if (interval_in_unavailable_time):
-                model.add_bool_and(interval.presence_literals) # set bool = 0
+                model.add_bool_and(interval.presence_literals[0]) # set bool = 0
         return
 
 

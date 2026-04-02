@@ -4,6 +4,7 @@ from Scheduler.lib.Data_types.Course import Course
 from Scheduler.CPSAT.Make_CPSAT_variables import CPSAT_variable_maker
 from Scheduler.CPSAT.Add_CPSAT_constraints import Constraint_adder
 from Scheduler.CPSAT.Solve_CPSAT_objectives import Solve_best_schedule
+from Scheduler.CPSAT.Extract_solver_values import Solver_values_extractor
 
 class Schedule_maker:
     def __init__(self, 
@@ -11,17 +12,24 @@ class Schedule_maker:
                  courses: list[Course], commute_times: int =  0):
         
         model = cp_model.CpModel()
+        solver = cp_model.CpSolver()
 
-        (self.start_time_variables, self.is_present_variables,
-         self.interval_variables, self.intervals_by_day,
-         self.days_present) = self.__add_courses_to_CPSAT(courses, model)
+        (start_time_variables, is_present_variables,
+         interval_variables, intervals_by_day,
+         days_present) = self.__add_courses_to_CPSAT(courses, model)
         
-        self.__add_constraints(unavailable_hours, self.intervals_by_day,
-                               self.days_present, self.interval_variables,
+        self.__add_constraints(unavailable_hours, intervals_by_day,
+                               days_present, interval_variables,
                                courses, model)
         
-        self.__solve_for_objectives(self.intervals_by_day, self.days_present,
-                                    model, commute_times)
+        status = self.__solve_for_objectives(intervals_by_day, days_present,
+                                             model, solver, commute_times)
+        
+        del self.intervals_by_day
+        del self.days_present
+        
+        self.all_chosen_classes = self.__extract_solver_values(courses, status,
+                                                               )
     
 
     def __add_courses_to_CPSAT(self, courses: list[Course], model: cp_model
@@ -54,11 +62,26 @@ class Schedule_maker:
                                intervals_by_day: dict[str, list[Any]],
                                days_present: list[Any],
                                model: cp_model,
-                               commute_times: int = 0):
-        solver = cp_model.CpSolver()
+                               solver: cp_model,
+                               commute_times: int = 0) -> int:
+        
         solver.parameters.log_search_progress = True  # Enable logging
         Solve_best_schedule(intervals_by_day, days_present, model, solver, commute_times)
-        print(model.Validate())
-        return
+        status = solver.solve(model)
+        return status
 
+
+    def __extract_solver_values(self, 
+                                courses: list[Course],
+                                status: int,
+                                interval_variables: dict[str, dict[str, dict
+                                                        [str, dict[int, Any]]]],
+                                model: cp_model,
+                                solver: cp_model):
+        
+        Solver_values_extractor_obj = Solver_values_extractor(courses, status,
+                                                              interval_variables,
+                                                              model, solver)
+        all_chosen_classes = Solver_values_extractor_obj.all_chosen_classes
+        return all_chosen_classes
 
